@@ -1,7 +1,7 @@
 use regex::{Regex, Captures};
 use std::cell::{Cell, RefCell};
-use std::rc::{Rc};
-use std::{fmt};
+use std::rc::Rc;
+use std::fmt;
 
 #[derive(Debug)]
 pub struct StringScanner<'t> {
@@ -25,18 +25,14 @@ impl<'t> fmt::Debug for LastMatch<'t> {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self.caps {
             None => write!(f, "matchdata: None"),
-            Some(ref caps) => {
-                write!(f, "matchdata: {:?}", caps.iter_pos().collect::<Vec<_>>())
-            }
+            Some(ref caps) => write!(f, "matchdata: {:?}", caps.iter_pos().collect::<Vec<_>>()),
         }
     }
 }
 
 impl<'t> StringScanner<'t> {
     pub fn new<'a>(string: &'a str) -> StringScanner<'a> {
-        let last_match = RefCell::new(LastMatch {
-            caps: None,
-        });
+        let last_match = RefCell::new(LastMatch { caps: None });
         StringScanner {
             string: string,
             pos: Cell::new(0),
@@ -47,11 +43,15 @@ impl<'t> StringScanner<'t> {
 
     // Are we at the beginning of a line?
     pub fn is_bol(&self) -> bool {
-        if self.pos.get() == 0 { return true; }
-        if self.pos.get() > self.end { return false; }
+        if self.pos.get() == 0 {
+            return true;
+        }
+        if self.pos.get() > self.end {
+            return false;
+        }
         match &self.string[self.pos.get() - 1..self.pos.get()] {
             c if c == "\n" => true,
-            _ => false
+            _ => false,
         }
     }
 
@@ -77,7 +77,9 @@ impl<'t> StringScanner<'t> {
     }
 
     pub fn peek_bytes(&self, len: usize) -> Option<&str> {
-        if self.is_eos() { return None; }
+        if self.is_eos() {
+            return None;
+        }
         let mut end = self.pos.get() + len;
         if end > self.end {
             end = self.end;
@@ -86,31 +88,40 @@ impl<'t> StringScanner<'t> {
     }
 
     pub fn peek_chars(&self, mut len: usize) -> Option<&str> {
-        if self.is_eos() { return None; }
+        if self.is_eos() {
+            return None;
+        }
         let rest = self.rest().unwrap();
         let num_chars_rem = rest.chars().count();
         if len > num_chars_rem {
             len = num_chars_rem
         }
-        Some(rest.slice_chars(0, len))
+        // Some(rest.slice_chars(0, len))
+        Some(&rest[0..len])
     }
 
     pub fn rest(&self) -> Option<&str> {
-        if self.is_eos() { return None; }
+        if self.is_eos() {
+            return None;
+        }
         Some(&self.string[self.pos.get()..])
     }
 
     pub fn get_byte(&self) -> Option<u8> {
-        if self.is_eos() { return None; }
+        if self.is_eos() {
+            return None;
+        }
         let byte_slice = &self.rest().unwrap()[self.pos.get()..self.pos.get() + 1];
         self.pos.set(self.pos.get() + 1);
         Some(byte_slice.as_bytes()[0])
     }
 
     pub fn get_char(&self) -> Option<&str> {
-        if self.is_eos() { return None; }
+        if self.is_eos() {
+            return None;
+        }
         let rest = &self.string[self.pos.get()..];
-        let chr = rest.slice_chars(0, 1);
+        let chr = &rest[0..1];
         self.pos.set(self.pos.get() + chr.len());
         Some(chr)
     }
@@ -130,8 +141,8 @@ impl<'t> StringScanner<'t> {
                 self.pos.set(new_pos);
                 self.last_match.borrow_mut().set(Some(Rc::new(caps)));
                 Some(ret)
-            },
-            None => unreachable!()
+            }
+            None => unreachable!(),
         }
     }
 
@@ -158,7 +169,7 @@ impl<'t> StringScanner<'t> {
     pub fn match_at(&self, i: usize) -> Option<&str> {
         match self.captures() {
             Some(caps) => caps.at(i),
-            None => None
+            None => None,
         }
     }
 
@@ -166,7 +177,7 @@ impl<'t> StringScanner<'t> {
     pub fn match_name(&self, name: &str) -> Option<&str> {
         match self.captures() {
             Some(caps) => caps.name(name),
-            None => None
+            None => None,
         }
     }
 }
@@ -178,7 +189,7 @@ fn test_is_bol() {
     scanner.set_pos(5);
     assert!(scanner.is_bol());
     scanner.set_pos(6);
-    assert!(! scanner.is_bol());
+    assert!(!scanner.is_bol());
 }
 
 #[test]
@@ -209,7 +220,7 @@ fn test_set_pos() {
     assert_eq!(0, scanner.get_pos());
     assert!(scanner.set_pos(1));
     assert_eq!(1, scanner.get_pos());
-    assert!(! scanner.set_pos(100));
+    assert!(!scanner.set_pos(100));
     assert_eq!(1, scanner.get_pos());
 }
 
@@ -253,7 +264,7 @@ fn test_check() {
     let re_chars = Regex::new(r"^\w+").unwrap();
     let re_ws = Regex::new(r"^\s+").unwrap();
     assert!(scanner.check(&re_chars));
-    assert!(! scanner.check(&re_ws));
+    assert!(!scanner.check(&re_ws));
 }
 
 #[test]
