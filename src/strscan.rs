@@ -96,8 +96,12 @@ impl<'t> StringScanner<'t> {
         if len > num_chars_rem {
             len = num_chars_rem
         }
-        // Some(rest.slice_chars(0, len))
-        Some(&rest[0..len])
+        let v: Vec<char> = rest.chars().collect();
+        let mut i: usize = 0;
+        for x in 0..len {
+            i += v[x].len_utf8();
+        }
+        Some(&rest[0..i])
     }
 
     pub fn rest(&self) -> Option<&str> {
