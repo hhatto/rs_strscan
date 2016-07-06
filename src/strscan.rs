@@ -126,7 +126,7 @@ impl<'t> StringScanner<'t> {
         }
         let rest = &self.string[self.pos.get()..];
         let v: Vec<char> = rest.chars().collect();
-        let chr = &rest[0..v[1].len_utf8()];
+        let chr = &rest[0..v[0].len_utf8()];
         self.pos.set(self.pos.get() + chr.len());
         Some(chr)
     }
