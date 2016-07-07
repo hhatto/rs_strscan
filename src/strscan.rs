@@ -51,7 +51,7 @@ impl<'t> StringScanner<'t> {
         }
         let rest = &self.string[..self.pos.get()];
         let v: Vec<char> = rest.chars().rev().collect();
-        let offset = v[1].len_utf8();
+        let offset = v[0].len_utf8();
         match &self.string[self.pos.get() - offset..self.pos.get()] {
             c if c == "\n" => true,
             _ => false,
